@@ -61,7 +61,6 @@ def plotAccuracy(results, truth, train=None, window=100, label=None, params=None
   plt.title('Prediction Error Over Time')
 
   error = results[0]
-
   x = results[1]
   x = x[:len(error)]
 
@@ -83,9 +82,8 @@ def plotAccuracy(results, truth, train=None, window=100, label=None, params=None
     meanError = np.nanmean(error)
     avgError = movingData
   elif errorType == 'mape':
-
-    normFactor = np.nanstd(truth)
-    print label, " MAPE:", np.nanmean(error)  / normFactor
+    normFactor = np.nanmean(np.abs(truth))
+    print label, " MAPE:", np.nanmean(error) / normFactor
     meanError = np.nanmean(error) / normFactor
     avgError = movingData / normFactor
   else:

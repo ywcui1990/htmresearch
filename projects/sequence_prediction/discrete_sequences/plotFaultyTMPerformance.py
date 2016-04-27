@@ -108,12 +108,14 @@ if __name__ == '__main__':
 
   plt.figure(1)
   colorList = {'HTM': 'r', 'ELM': 'b', 'LSTM': 'g'}
+  markerList = {'HTM': 'o', 'ELM': 'x', 'LSTM': '^'}
   for model in ['HTM', 'ELM', 'LSTM']:
     plt.errorbar(expResults[model]['x'],
                  expResults[model]['meanAccuracy'],
                  expResults[model]['stdAccuracy'],
-                 color=colorList[model],
-                 marker='o')
+                 color='k',
+                 marker=markerList[model],
+                 markersize=12)
   plt.legend(['HTM', 'ELM', 'LSTM'], loc=3)
   plt.xlabel('Fraction of cell death ')
   plt.ylabel('Accuracy after cell death')

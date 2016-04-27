@@ -26,7 +26,7 @@ Plot temporal noise experiment result
 import os
 from matplotlib import pyplot
 import matplotlib as mpl
-import numpy
+import numpy as np
 
 from plot import plotAccuracy
 from plot import readExperiment
@@ -52,8 +52,8 @@ def computeAccuracy(predictions, truths, sequenceCounter):
 if __name__ == '__main__':
 
   experiments = [os.path.join("tm/results", "reber", "0.log"),
-                 os.path.join("lstm/results", "reber-distributed", "0.log"),
-                 os.path.join("elm/results", "reber-basic", "0.log")]
+                 os.path.join("elm/results", "reber-basic", "0.log"),
+                 os.path.join("lstm/results", "reber-distributed", "0.log")]
 
   for experiment in experiments:
     data = readExperiment(experiment)
@@ -69,6 +69,10 @@ if __name__ == '__main__':
                  hideTraining=True,
                  lineSize=1.0)
     pyplot.xlabel('# of sequences seen')
+
+    x = np.array(x)
+    accuracy = np.array(accuracy)
+    np.mean(accuracy[np.where(np.array(x)>500)[0]])
 
   pyplot.ylabel('Prediction accuracy')
   pyplot.xlim([0, 250])

@@ -27,7 +27,6 @@ import numpy as np
 
 from hpelm import ELM
 
-from swarm_runner import SwarmRunner
 from scipy import random
 
 import pandas as pd
@@ -56,7 +55,7 @@ def readDataSet(dataSet):
   # df = pd.read_csv(filePath, header=0, skiprows=[1, 2], names=['time', 'data'])
   # sequence = df['data']
 
-  if dataSet=='nyc_taxi':
+  if dataSet=='nyc_taxi' or dataSet=='nyc_taxi_perturb':
     df = pd.read_csv(filePath, header=0, skiprows=[1,2],
                      names=['time', 'data', 'timeofday', 'dayofweek'])
     sequence = df['data']
@@ -172,10 +171,8 @@ if __name__ == "__main__":
 
 
   print "run ELM on ", dataSet
-  SWARM_CONFIG = SwarmRunner.importSwarmDescription(dataSet)
-  predictedField = SWARM_CONFIG['inferenceArgs']['predictedField']
-  nTrain = SWARM_CONFIG["streamDef"]['streams'][0]['last_record']
-  predictionStep = SWARM_CONFIG['inferenceArgs']['predictionSteps'][0]
+
+  predictionStep = 5
 
   useTimeOfDay = True
   useDayOfWeek = True
