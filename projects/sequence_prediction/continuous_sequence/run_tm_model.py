@@ -343,6 +343,7 @@ if __name__ == "__main__":
     patternNZ = tpOutput.reshape(-1).nonzero()[0]
     activeColumn = patternNZ / tm.cellsPerColumn
     activeCellNum.append(len(patternNZ))
+    patternNZ_track.append(patternNZ)
 
     predictedActiveColumns = np.intersect1d(prePredictiveColumn, activeColumn)
     predictedActiveColumnsNum.append(len(predictedActiveColumns))
@@ -465,3 +466,17 @@ if __name__ == "__main__":
   plt.ylabel('sparsity')
   plt.xlim([0, 5000])
   plt.savefig('result/sparsity_over_training.pdf')
+
+
+  activeCellMat = np.zeros((5000, tm.numberOfCells()))
+  for i in range(5000):
+    activeCellMat[i, patternNZ_track[i]] = 1
+
+  displayCell = np.random.choice(tm.numberOfCells(), size=(2000,))
+  activeCellMatDisplay = activeCellMat[:, displayCell]
+
+  plt.figure()
+  plt.imshow(np.transpose(activeCellMatDisplay), interpolation="nearest", cmap='gray')
+  plt.xlabel('time')
+  plt.ylabel('cell index')
+  plt.savefig('result/activity_over_training.pdf')
