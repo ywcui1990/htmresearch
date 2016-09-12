@@ -157,6 +157,25 @@ def printTPRegionParams(tpregion):
 
 
 
+def raster(event_times_list, color='k'):
+  """
+  Creates a raster from spike trains.
+
+  @param event_times_list (array) matrix containing times in which a cell fired
+  @param color (string) color of spike in raster
+
+  @return ax (int) position of plot axes
+  """
+  ax = plt.gca()
+  for ith, trial in enumerate(event_times_list):
+    # plt.vlines(trial, ith + .3, ith + 1.3, color=color)
+
+    plt.plot(trial, [ith] * len(trial), 'o', color=color, markersize=1)
+  plt.ylim(.5, len(event_times_list) + .5)
+  return ax
+
+
+
 def runMultiplePass(df, model, nMultiplePass, nTrain):
   """
   run CLA model through data record 0:nTrain nMultiplePass passes
@@ -205,6 +224,37 @@ def movingAverage(a, n):
 
   return movingAverage
 
+
+def plotTMActivationOverTime(tm, patternNZ_track, numCellsToShow=100):
+  xl = [0, 4000]
+  activeCellMat = np.zeros((5000, tm.numberOfCells()))
+  for i in range(5000):
+    activeCellMat[i, patternNZ_track[i]] = 1
+
+  displayCell = np.random.choice(tm.numberOfCells(), size=(numCellsToShow,))
+  activeCellMatDisplay = activeCellMat[:, displayCell]
+
+  spikeTrain = np.transpose(activeCellMatDisplay)
+  numNeurons = np.shape(spikeTrain)[0]
+  spikes = []
+  for i in range(numNeurons):
+    spikes.append(spikeTrain[i].nonzero()[0].tolist())
+
+  plt.figure()
+  ax = raster(spikes)
+  plt.xlabel('Time')
+  plt.ylabel('Neuron')
+  plt.xlim(xl)
+  plt.ylim([0, numCellsToShow])
+  plt.savefig('result/activity_over_training.pdf')
+
+  fig, ax = plt.subplots(1, 1)
+  activeCellNumAvg = movingAverage(activeCellNum, 100)
+  ax.plot(np.array(activeCellNumAvg)/tm.numberOfCells(), color='k')
+  ax.set_xlabel('time')
+  ax.set_ylabel('sparsity')
+  ax.set_xlim(xl)
+  plt.savefig('result/sparsity_over_training.pdf')
 
 
 if __name__ == "__main__":
@@ -459,24 +509,6 @@ if __name__ == "__main__":
   np.save('./result/'+dataSet+classifierType+'TMprediction.npy', predictions)
   np.save('./result/'+dataSet+classifierType+'TMtruth.npy', truth)
 
-  plt.figure()
-  activeCellNumAvg = movingAverage(activeCellNum, 100)
-  plt.plot(np.array(activeCellNumAvg)/tm.numberOfCells())
-  plt.xlabel('data records')
-  plt.ylabel('sparsity')
-  plt.xlim([0, 5000])
-  plt.savefig('result/sparsity_over_training.pdf')
 
-
-  activeCellMat = np.zeros((5000, tm.numberOfCells()))
-  for i in range(5000):
-    activeCellMat[i, patternNZ_track[i]] = 1
-
-  displayCell = np.random.choice(tm.numberOfCells(), size=(2000,))
-  activeCellMatDisplay = activeCellMat[:, displayCell]
-
-  plt.figure()
-  plt.imshow(np.transpose(activeCellMatDisplay), interpolation="nearest", cmap='gray')
-  plt.xlabel('time')
-  plt.ylabel('cell index')
-  plt.savefig('result/activity_over_training.pdf')
+  # plot tm activations over time
+  plotTMActivationOverTime(tm, patternNZ_track)
