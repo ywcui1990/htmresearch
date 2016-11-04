@@ -290,7 +290,7 @@ def plotResults(result, ax=None, xaxis="numPointsPerObject",
   ax[0, 0].set_ylabel("Accuracy")
   ax[0, 0].set_xlabel(xlabel)
 
-  ax[0, 1].plot(x, result.numberOfConnectedSynapses, marker)
+  ax[0, 1].plot(x, result.numberOfConnectedProximalSynapses, marker)
   ax[0, 1].set_ylabel("# connected synapses")
   ax[0, 1].set_xlabel("# Pts / Obj")
   ax[0, 1].set_xlabel(xlabel)
@@ -443,7 +443,7 @@ def runCapacityTestVaryingObjectNum(numPointsPerObject=10,
              activationThreshold,
              numCorticalColumns)
             for numObjects in np.arange(20, 1371, 150)]
-
+  print "{} experiments to run".format(len(params))
   for testResult in pool.map(invokeRunCapacityTest, params):
     print testResult
 
@@ -454,8 +454,9 @@ def runCapacityTestVaryingObjectNum(numPointsPerObject=10,
     )
 
   resultFileName = _prepareResultsDir(
-    "multiple_column_capacity_varying_object_num_synapses_{}_thresh_{}.csv"
-      .format(maxNewSynapseCount, activationThreshold),
+    "multiple_column_capacity_varying_object_num_synapses_{}_thresh_{}"
+    "_numColumns_{}.csv"
+      .format(maxNewSynapseCount, activationThreshold, numCorticalColumns),
     resultDirName=resultDirName
   )
 
@@ -500,8 +501,9 @@ def runExperiment1(numObjects=2,
     activationThreshold = int(maxNewSynapseCount) - 1
 
     resultFileName = _prepareResultsDir(
-      "multiple_column_capacity_varying_object_size_synapses_{}_thresh_{}.csv"
-      .format(maxNewSynapseCount, activationThreshold),
+      "multiple_column_capacity_varying_object_size_synapses_{}_thresh_{}"
+      "_numColumns_{}.csv"
+      .format(maxNewSynapseCount, activationThreshold, numCorticalColumns),
       resultDirName=resultDirName
     )
 
@@ -567,8 +569,9 @@ def runExperiment2(numCorticalColumns=DEFAULT_NUM_CORTICAL_COLUMNS,
     activationThreshold = int(maxNewSynapseCount) - 1
 
     resultFileName = _prepareResultsDir(
-      "multiple_column_capacity_varying_object_num_synapses_{}_thresh_{}.csv"
-      .format(maxNewSynapseCount, activationThreshold),
+      "multiple_column_capacity_varying_object_num_synapses_{}_thresh_{}"
+      "_numColumns_{}.csv"
+      .format(maxNewSynapseCount, activationThreshold, numCorticalColumns),
       resultDirName=resultDirName
     )
 
@@ -595,17 +598,60 @@ def runExperiment2(numCorticalColumns=DEFAULT_NUM_CORTICAL_COLUMNS,
 
 def runExperiments(numCorticalColumns, resultDirName, plotDirName, cpuCount):
 
-  # Varying number of pts per objects, two objects
-  runExperiment1(numCorticalColumns=numCorticalColumns,
-                 resultDirName=resultDirName,
-                 plotDirName=plotDirName,
-                 cpuCount=cpuCount)
+  # # Varying number of pts per objects, two objects
+  # runExperiment1(numCorticalColumns=numCorticalColumns,
+  #                resultDirName=resultDirName,
+  #                plotDirName=plotDirName,
+  #                cpuCount=cpuCount)
 
   # 10 pts per object, varying number of objects
   runExperiment2(numCorticalColumns=numCorticalColumns,
                  resultDirName=resultDirName,
                  plotDirName=plotDirName,
                  cpuCount=cpuCount)
+
+
+
+def plotCapacityVsColumnNumber(numCorticalColumnsList):
+  """
+  Plot capacity test for L4-L2 with varying number of cortical columns
+
+  You need to run the experiments first with the listed number of columns
+
+  :return:
+  """
+  markers = ("-bo", "-ro", "-co", "-go", "-mo", "-ko", "-yo")
+  ploti = 0
+  fig, ax = plt.subplots(2, 2)
+  st = fig.suptitle(
+    "Capacity vs. Column #", fontsize="x-large")
+
+  legendEntries = []
+  resultDirName = DEFAULT_RESULT_DIR_NAME
+  for numCorticalColumns in numCorticalColumnsList:
+    maxNewSynapseCount = 10
+    activationThreshold = int(maxNewSynapseCount) - 1
+
+    resultFileName = _prepareResultsDir(
+      "multiple_column_capacity_varying_object_num_synapses_{}_thresh_{}"
+      "_numColumns_{}.csv"
+        .format(maxNewSynapseCount, activationThreshold, numCorticalColumns),
+      resultDirName=resultDirName
+    )
+
+    result = pd.read_csv(resultFileName)
+
+    plotResults(result, ax, "numObjects", None, markers[ploti])
+    ploti += 1
+    legendEntries.append('numColumns {}'.format(numCorticalColumns))
+
+  fig.tight_layout()
+
+  # shift subplots down:
+  st.set_y(0.95)
+  fig.subplots_adjust(top=0.85)
+  plt.legend(legendEntries)
+  plt.savefig('plots/capacity_vs_column_number.pdf')
 
 
 
@@ -639,7 +685,10 @@ if __name__ == "__main__":
 
   opts = parser.parse_args()
 
-  runExperiments(numCorticalColumns=opts.numCorticalColumns,
-                 resultDirName=opts.resultDirName,
-                 plotDirName=opts.plotDirName,
-                 cpuCount=opts.cpuCount)
+  # runExperiments(numCorticalColumns=opts.numCorticalColumns,
+  #                resultDirName=opts.resultDirName,
+  #                plotDirName=opts.plotDirName,
+  #                cpuCount=opts.cpuCount)
+
+  # uncomment to plot capacity vs. column number
+  plotCapacityVsColumnNumber([1, 2, 3, 4, 5])
